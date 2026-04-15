@@ -6,22 +6,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TSC — Sprout Recipe Intelligence</title>
     <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=Cormorant:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- PDFKit for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         :root {
-            --forest: #1a3a2a;
-            --forest-deep: #0d2018;
-            --forest-mid: #2d5c42;
-            --lime: #8bc34a;
-            --lime-bright: #a5d63c;
-            --gold: #c8a84b;
-            --cream: #f8f5ee;
-            --cream-dark: #ede8dd;
+            /* New Color Palette */
+            --lake: #55A5C3;
+            --lake-dark: #3d7a95;
+            --pumpkin: #FF5F23;
+            --algae: #96A000;
+            --straw: #F5BE00;
+            --red-clay: #DC3200;
+            --sand: #DCD7CD;
+            --black: #000000;
             --white: #ffffff;
-            --text-dark: #1a3a2a;
-            --text-muted: #5a7a65;
-            --shadow: rgba(26, 58, 42, 0.15);
+            --grey-light: #f5f5f5;
+            --grey-medium: #999999;
+            --grey-dark: #333333;
+            
+            /* Legacy aliases for compatibility */
+            --forest: var(--lake);
+            --forest-deep: var(--white);
+            --forest-mid: var(--lake-dark);
+            --lime: var(--algae);
+            --lime-bright: var(--straw);
+            --gold: var(--straw);
+            --cream: var(--sand);
+            --cream-dark: #e8e3d8;
+            --text-dark: var(--grey-dark);
+            --text-muted: var(--grey-medium);
+            --shadow: rgba(85, 165, 195, 0.1);
         }
 
         *,
@@ -38,9 +54,10 @@
 
         body {
             font-family: 'DM Sans', sans-serif;
-            background: var(--cream);
+            background: var(--white);
             color: var(--text-dark);
             overflow-x: hidden;
+            padding-top: 80px;
         }
 
         /* ── NOISE OVERLAY ── */
@@ -61,13 +78,14 @@
             left: 0;
             right: 0;
             z-index: 100;
-            padding: 18px 48px;
+            padding: 16px 48px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(13, 32, 24, 0.92);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(139, 195, 74, 0.15);
+            background: var(--white);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(85, 165, 195, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
             animation: slideDown 0.6s ease both;
         }
 
@@ -75,62 +93,82 @@
             font-family: 'Playfair Display', serif;
             font-size: 1.5rem;
             font-weight: 900;
-            color: var(--lime);
+            color: var(--lake);
             letter-spacing: -0.5px;
         }
 
         .nav-logo span {
-            color: var(--cream);
+            color: var(--grey-dark);
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 40px;
             list-style: none;
         }
 
         .nav-links a {
-            color: rgba(248, 245, 238, 0.7);
+            color: var(--grey-dark);
             text-decoration: none;
             font-size: 0.875rem;
             font-weight: 500;
             letter-spacing: 0.5px;
             transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--lake);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
         }
 
         .nav-links a:hover {
-            color: var(--lime);
+            color: var(--lake);
         }
 
         .nav-cta {
-            background: var(--lime);
-            color: var(--forest-deep);
+            background: var(--lake);
+            color: var(--white);
             padding: 10px 24px;
             border-radius: 100px;
             font-weight: 600;
             font-size: 0.875rem;
             text-decoration: none;
             transition: all 0.3s;
-            box-shadow: 0 0 20px rgba(139, 195, 74, 0.3);
+            box-shadow: 0 2px 8px rgba(85, 165, 195, 0.15);
         }
 
         .nav-cta:hover {
-            background: var(--lime-bright);
+            background: var(--lake-dark);
             transform: translateY(-1px);
-            box-shadow: 0 4px 24px rgba(139, 195, 74, 0.5);
+            box-shadow: 0 4px 16px rgba(85, 165, 195, 0.25);
         }
 
         /* ── HERO ── */
         .hero {
             min-height: 100vh;
-            background: var(--forest-deep);
+            background: linear-gradient(135deg, var(--white) 0%, rgba(242, 248, 252, 0.8) 100%);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             position: relative;
             overflow: hidden;
-            padding: 100px 48px 60px;
+            padding: 60px 48px;
+            margin-top: 0;
         }
 
         /* Animated gradient orbs */
@@ -144,7 +182,7 @@
         .orb-1 {
             width: 600px;
             height: 600px;
-            background: radial-gradient(circle, rgba(45, 92, 66, 0.6), transparent 70%);
+            background: radial-gradient(circle, rgba(85, 165, 195, 0.08), transparent 70%);
             top: -100px;
             left: -150px;
             animation: drift1 12s ease-in-out infinite alternate;
@@ -153,7 +191,7 @@
         .orb-2 {
             width: 400px;
             height: 400px;
-            background: radial-gradient(circle, rgba(139, 195, 74, 0.2), transparent 70%);
+            background: radial-gradient(circle, rgba(150, 160, 0, 0.06), transparent 70%);
             bottom: 50px;
             right: -80px;
             animation: drift2 9s ease-in-out infinite alternate;
@@ -162,7 +200,7 @@
         .orb-3 {
             width: 300px;
             height: 300px;
-            background: radial-gradient(circle, rgba(200, 168, 75, 0.15), transparent 70%);
+            background: radial-gradient(circle, rgba(245, 190, 0, 0.05), transparent 70%);
             top: 40%;
             left: 60%;
             animation: drift3 15s ease-in-out infinite alternate;
@@ -180,7 +218,7 @@
             position: absolute;
             width: 8px;
             height: 8px;
-            background: var(--lime);
+            background: rgba(85, 165, 195, 0.3);
             border-radius: 50% 0 50% 0;
             opacity: 0;
             animation: float-particle 8s ease-in-out infinite;
@@ -204,7 +242,7 @@
             left: 45%;
             animation-delay: 3s;
             animation-duration: 8s;
-            background: var(--gold);
+            background: rgba(245, 190, 0, 0.25);
         }
 
         .particle:nth-child(4) {
@@ -225,7 +263,7 @@
             left: 90%;
             animation-delay: 4s;
             animation-duration: 9s;
-            background: var(--gold);
+            background: rgba(245, 190, 0, 0.25);
             opacity: 0;
         }
 
@@ -233,9 +271,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(139, 195, 74, 0.12);
-            border: 1px solid rgba(139, 195, 74, 0.3);
-            color: var(--lime);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--lake);
             font-size: 0.75rem;
             font-weight: 600;
             letter-spacing: 1.5px;
@@ -252,25 +290,25 @@
         }
 
         .hero h1 {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: clamp(2.8rem, 6vw, 5.5rem);
             font-weight: 900;
             line-height: 1.05;
-            color: var(--cream);
+            color: var(--grey-dark);
             text-align: center;
             max-width: 900px;
             animation: fadeUp 0.8s 0.4s ease both;
         }
 
         .hero h1 em {
-            color: var(--lime);
+            color: var(--lake);
             font-style: italic;
         }
 
         .hero-sub {
             font-size: 1.1rem;
             line-height: 1.7;
-            color: rgba(248, 245, 238, 0.65);
+            color: var(--grey-medium);
             text-align: center;
             max-width: 580px;
             margin: 24px 0 48px;
@@ -286,8 +324,8 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--lime), var(--lime-bright));
-            color: var(--forest-deep);
+            background: var(--lake);
+            color: var(--white);
             padding: 16px 36px;
             border-radius: 100px;
             font-weight: 700;
@@ -295,18 +333,19 @@
             border: none;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 8px 32px rgba(139, 195, 74, 0.4);
+            box-shadow: 0 4px 16px rgba(85, 165, 195, 0.2);
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(139, 195, 74, 0.6);
+            box-shadow: 0 8px 24px rgba(85, 165, 195, 0.3);
+            background: var(--lake-dark);
         }
 
         .btn-secondary {
             background: transparent;
-            color: var(--cream);
-            border: 1.5px solid rgba(248, 245, 238, 0.3);
+            color: var(--grey-dark);
+            border: 1.5px solid rgba(85, 165, 195, 0.2);
             padding: 16px 36px;
             border-radius: 100px;
             font-weight: 500;
@@ -316,8 +355,9 @@
         }
 
         .btn-secondary:hover {
-            border-color: var(--lime);
-            color: var(--lime);
+            border-color: var(--lake);
+            color: var(--lake);
+            background: rgba(85, 165, 195, 0.05);
         }
 
         /* Stats strip */
@@ -328,7 +368,7 @@
             justify-content: center;
             margin-top: 48px;
             padding-top: 36px;
-            border-top: 1px solid rgba(248, 245, 238, 0.08);
+            border-top: 1px solid rgba(85, 165, 195, 0.1);
             animation: fadeUp 0.8s 1s ease both;
             width: 100%;
             max-width: 800px;
@@ -339,16 +379,16 @@
         }
 
         .stat-num {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 2rem;
             font-weight: 900;
-            color: var(--lime);
+            color: var(--lake);
             display: block;
         }
 
         .stat-label {
             font-size: 0.78rem;
-            color: rgba(248, 245, 238, 0.5);
+            color: var(--grey-medium);
             letter-spacing: 0.5px;
             margin-top: 4px;
         }
@@ -369,20 +409,20 @@
             font-weight: 600;
             letter-spacing: 2px;
             text-transform: uppercase;
-            color: var(--lime);
+            color: var(--lake);
             margin-bottom: 16px;
         }
 
         .section-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: clamp(2rem, 4vw, 3rem);
             font-weight: 900;
             line-height: 1.15;
-            color: var(--forest-deep);
+            color: var(--grey-dark);
         }
 
         .features-bg {
-            background: var(--cream);
+            background: var(--grey-light);
         }
 
         .features-grid {
@@ -397,8 +437,8 @@
             background: white;
             border-radius: 20px;
             padding: 28px 24px;
-            border: 1px solid rgba(26, 58, 42, 0.08);
-            box-shadow: 0 4px 24px var(--shadow);
+            border: 1px solid rgba(85, 165, 195, 0.08);
+            box-shadow: 0 2px 12px rgba(85, 165, 195, 0.08);
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             position: relative;
             overflow: hidden;
@@ -411,7 +451,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, var(--lime), var(--gold));
+            background: linear-gradient(90deg, var(--lake), var(--straw));
             transform: scaleX(0);
             transform-origin: left;
             transition: transform 0.4s ease;
@@ -419,7 +459,7 @@
 
         .feature-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 16px 48px var(--shadow);
+            box-shadow: 0 8px 24px rgba(85, 165, 195, 0.15);
         }
 
         .feature-card:hover::before {
@@ -429,20 +469,29 @@
         .feature-icon {
             width: 56px;
             height: 56px;
-            background: linear-gradient(135deg, var(--forest), var(--forest-mid));
+            background: linear-gradient(135deg, var(--lake), var(--lake-dark));
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
+            color: white;
             margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .feature-icon svg {
+            width: 100%;
+            height: 100%;
+            padding: 8px;
         }
 
         .feature-title {
             font-size: 1.1rem;
             font-weight: 700;
-            color: var(--forest-deep);
+            color: var(--grey-dark);
             margin-bottom: 10px;
+            font-family: 'Cormorant', serif;
         }
 
         .feature-desc {
@@ -453,7 +502,7 @@
 
         /* ── GENERATOR SECTION ── */
         .generator-section {
-            background: var(--forest-deep);
+            background: rgba(242, 248, 252, 0.6);
             position: relative;
             overflow: hidden;
         }
@@ -462,8 +511,8 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse at 20% 50%, rgba(45, 92, 66, 0.4), transparent 60%),
-                radial-gradient(ellipse at 80% 20%, rgba(139, 195, 74, 0.08), transparent 50%);
+            background: radial-gradient(ellipse at 20% 50%, rgba(85, 165, 195, 0.08), transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(150, 160, 0, 0.04), transparent 50%);
         }
 
         .generator-inner {
@@ -474,7 +523,7 @@
         }
 
         .generator-section .section-title {
-            color: var(--cream);
+            color: var(--grey-dark);
         }
 
         .form-grid {
@@ -499,17 +548,17 @@
             font-weight: 600;
             letter-spacing: 0.5px;
             text-transform: uppercase;
-            color: rgba(248, 245, 238, 0.6);
+            color: var(--grey-medium);
         }
 
         input,
         select,
         textarea {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(139, 195, 74, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(85, 165, 195, 0.2);
             border-radius: 12px;
             padding: 14px 18px;
-            color: var(--cream);
+            color: var(--grey-dark);
             font-family: 'DM Sans', sans-serif;
             font-size: 0.95rem;
             transition: all 0.3s;
@@ -518,20 +567,20 @@
 
         input::placeholder,
         textarea::placeholder {
-            color: rgba(248, 245, 238, 0.3);
+            color: rgba(85, 165, 195, 0.3);
         }
 
         input:focus,
         select:focus,
         textarea:focus {
-            border-color: var(--lime);
-            background: rgba(139, 195, 74, 0.08);
-            box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.15);
+            border-color: var(--lake);
+            background: rgba(85, 165, 195, 0.05);
+            box-shadow: 0 0 0 3px rgba(85, 165, 195, 0.1);
         }
 
         select option {
-            background: var(--forest-deep);
-            color: var(--cream);
+            background: var(--white);
+            color: var(--grey-dark);
         }
 
         textarea {
@@ -550,9 +599,9 @@
         .tag-btn {
             padding: 8px 16px;
             border-radius: 100px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(139, 195, 74, 0.25);
-            color: rgba(248, 245, 238, 0.7);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--grey-dark);
             font-size: 0.82rem;
             font-weight: 500;
             cursor: pointer;
@@ -562,23 +611,23 @@
 
         .tag-btn:hover,
         .tag-btn.active {
-            background: rgba(139, 195, 74, 0.2);
-            border-color: var(--lime);
-            color: var(--lime);
+            background: rgba(85, 165, 195, 0.15);
+            border-color: var(--lake);
+            color: var(--lake);
         }
 
         .generate-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--lime), var(--lime-bright));
-            color: var(--forest-deep);
+            background: var(--lake);
+            color: var(--white);
             padding: 18px;
             border-radius: 14px;
             font-weight: 700;
             font-size: 1.05rem;
             border: none;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 32px rgba(139, 195, 74, 0.35);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 16px rgba(85, 165, 195, 0.2);
             margin-top: 8px;
             letter-spacing: 0.3px;
             position: relative;
@@ -589,7 +638,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transform: translateX(-100%);
             transition: transform 0.5s ease;
         }
@@ -599,8 +648,14 @@
         }
 
         .generate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(139, 195, 74, 0.55);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 12px 32px rgba(85, 165, 195, 0.35);
+            background: var(--lake-dark);
+        }
+
+        .generate-btn:active {
+            transform: translateY(-1px) scale(0.98);
+            box-shadow: 0 6px 20px rgba(85, 165, 195, 0.25);
         }
 
         .generate-btn:disabled {
@@ -624,13 +679,13 @@
             background: white;
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(85, 165, 195, 0.1);
         }
 
         .recipe-img-placeholder {
             width: 100%;
             height: 320px;
-            background: linear-gradient(135deg, var(--forest-mid), var(--forest-deep));
+            background: linear-gradient(135deg, var(--lake), var(--lake-dark));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -643,12 +698,12 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(circle at 30% 60%, rgba(139, 195, 74, 0.3), transparent 50%);
+            background: radial-gradient(circle at 30% 60%, rgba(255, 255, 255, 0.15), transparent 50%);
         }
 
         .recipe-header {
             padding: 36px 40px 24px;
-            border-bottom: 1px solid rgba(26, 58, 42, 0.08);
+            border-bottom: 1px solid rgba(85, 165, 195, 0.08);
         }
 
         .recipe-meta {
@@ -671,10 +726,10 @@
         }
 
         .recipe-title-output {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 2rem;
             font-weight: 900;
-            color: var(--forest-deep);
+            color: var(--grey-dark);
             line-height: 1.2;
         }
 
@@ -686,8 +741,8 @@
 
         .recipe-sidebar {
             padding: 32px;
-            background: var(--cream);
-            border-right: 1px solid rgba(26, 58, 42, 0.08);
+            background: var(--grey-light);
+            border-right: 1px solid rgba(85, 165, 195, 0.08);
         }
 
         .recipe-main {
@@ -703,8 +758,9 @@
             font-weight: 700;
             letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: var(--lime);
+            color: var(--lake);
             margin-bottom: 14px;
+            font-family: 'Cormorant', serif;
         }
 
         .ingredient-list {
@@ -713,7 +769,7 @@
 
         .ingredient-list li {
             padding: 8px 0;
-            border-bottom: 1px solid rgba(26, 58, 42, 0.06);
+            border-bottom: 1px solid rgba(85, 165, 195, 0.06);
             font-size: 0.9rem;
             color: var(--text-dark);
             display: flex;
@@ -725,7 +781,7 @@
             content: '';
             width: 6px;
             height: 6px;
-            background: var(--lime);
+            background: var(--lake);
             border-radius: 50%;
             flex-shrink: 0;
         }
@@ -741,14 +797,14 @@
             border-radius: 10px;
             padding: 12px;
             text-align: center;
-            border: 1px solid rgba(26, 58, 42, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.08);
         }
 
         .nutrition-val {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 1.3rem;
             font-weight: 700;
-            color: var(--forest-deep);
+            color: var(--lake);
         }
 
         .nutrition-label {
@@ -761,9 +817,9 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            background: rgba(26, 58, 42, 0.08);
-            border: 1px solid rgba(26, 58, 42, 0.15);
-            color: var(--forest-mid);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.15);
+            color: var(--lake);
             font-size: 0.78rem;
             font-weight: 600;
             padding: 6px 12px;
@@ -772,9 +828,9 @@
         }
 
         .supernutrient-tag.highlight {
-            background: rgba(139, 195, 74, 0.15);
-            border-color: rgba(139, 195, 74, 0.4);
-            color: var(--forest);
+            background: rgba(150, 160, 0, 0.1);
+            border-color: rgba(150, 160, 0, 0.3);
+            color: var(--algae);
         }
 
         .step {
@@ -788,8 +844,8 @@
             width: 32px;
             height: 32px;
             flex-shrink: 0;
-            background: linear-gradient(135deg, var(--forest), var(--forest-mid));
-            color: var(--lime);
+            background: linear-gradient(135deg, var(--lake), var(--lake-dark));
+            color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -806,8 +862,8 @@
         }
 
         .tips-box {
-            background: linear-gradient(135deg, rgba(139, 195, 74, 0.08), rgba(200, 168, 75, 0.08));
-            border: 1px solid rgba(139, 195, 74, 0.2);
+            background: linear-gradient(135deg, rgba(85, 165, 195, 0.05), rgba(245, 190, 0, 0.05));
+            border: 1px solid rgba(85, 165, 195, 0.15);
             border-radius: 14px;
             padding: 20px 24px;
             margin-top: 24px;
@@ -816,7 +872,7 @@
         .tips-title {
             font-weight: 700;
             font-size: 0.85rem;
-            color: var(--forest);
+            color: var(--lake);
             margin-bottom: 8px;
         }
 
@@ -832,8 +888,8 @@
             text-align: center;
             padding: 48px 32px;
             margin-top: 32px;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(139, 195, 74, 0.15);
+            background: rgba(85, 165, 195, 0.03);
+            border: 1px solid rgba(85, 165, 195, 0.15);
             border-radius: 20px;
             animation: fadeUp 0.5s ease both;
         }
@@ -846,7 +902,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            border: 3px solid rgba(139, 195, 74, 0.2);
+            border: 3px solid rgba(85, 165, 195, 0.2);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -860,7 +916,7 @@
             position: absolute;
             inset: -6px;
             border-radius: 50%;
-            border: 2px solid rgba(139, 195, 74, 0.1);
+            border: 2px solid rgba(85, 165, 195, 0.1);
             animation: pulse-ring 2s ease-out infinite;
         }
 
@@ -868,20 +924,20 @@
             font-family: 'DM Sans', monospace;
             font-size: 2rem;
             font-weight: 700;
-            color: var(--lime);
+            color: var(--lake);
             letter-spacing: 2px;
         }
 
         .timer-message {
             font-size: 1.05rem;
             font-weight: 500;
-            color: rgba(248, 245, 238, 0.8);
+            color: var(--grey-dark);
             margin-bottom: 8px;
         }
 
         .timer-sub {
             font-size: 0.85rem;
-            color: rgba(248, 245, 238, 0.4);
+            color: var(--grey-medium);
         }
 
         .timer-dots {
@@ -894,13 +950,13 @@
 
             0%,
             100% {
-                border-color: rgba(139, 195, 74, 0.2);
-                box-shadow: 0 0 20px rgba(139, 195, 74, 0.05);
+                border-color: rgba(85, 165, 195, 0.2);
+                box-shadow: 0 0 20px rgba(85, 165, 195, 0.05);
             }
 
             50% {
-                border-color: rgba(139, 195, 74, 0.5);
-                box-shadow: 0 0 40px rgba(139, 195, 74, 0.15);
+                border-color: rgba(85, 165, 195, 0.5);
+                box-shadow: 0 0 40px rgba(85, 165, 195, 0.15);
             }
         }
 
@@ -918,9 +974,9 @@
 
         .timer-stop-btn {
             margin-top: 24px;
-            background: rgba(220, 60, 60, 0.1);
-            border: 1px solid rgba(220, 60, 60, 0.3);
-            color: #e57373;
+            background: rgba(220, 50, 50, 0.1);
+            border: 1px solid rgba(220, 50, 50, 0.3);
+            color: #dc3200;
             padding: 10px 24px;
             border-radius: 100px;
             font-size: 0.85rem;
@@ -933,8 +989,8 @@
         }
 
         .timer-stop-btn:hover {
-            background: rgba(220, 60, 60, 0.2);
-            border-color: rgba(220, 60, 60, 0.5);
+            background: rgba(220, 50, 50, 0.2);
+            border-color: rgba(220, 50, 50, 0.5);
             transform: translateY(-2px);
         }
 
@@ -956,29 +1012,29 @@
             justify-content: space-between;
             margin-bottom: 20px;
             padding-bottom: 16px;
-            border-bottom: 1px solid rgba(139, 195, 74, 0.15);
+            border-bottom: 1px solid rgba(85, 165, 195, 0.15);
         }
 
         .results-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 1.5rem;
             font-weight: 900;
-            color: var(--cream);
+            color: var(--grey-dark);
         }
 
         .results-count {
             font-size: 0.82rem;
             font-weight: 500;
-            color: rgba(248, 245, 238, 0.5);
-            background: rgba(139, 195, 74, 0.1);
-            border: 1px solid rgba(139, 195, 74, 0.2);
+            color: var(--grey-medium);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
             padding: 6px 14px;
             border-radius: 100px;
         }
 
         .result-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(139, 195, 74, 0.15);
+            background: rgba(85, 165, 195, 0.03);
+            border: 1px solid rgba(85, 165, 195, 0.15);
             border-radius: 18px;
             padding: 24px 28px;
             margin-bottom: 16px;
@@ -987,8 +1043,8 @@
         }
 
         .result-card:hover {
-            border-color: rgba(139, 195, 74, 0.35);
-            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(85, 165, 195, 0.3);
+            background: rgba(85, 165, 195, 0.05);
         }
 
         .result-card-top {
@@ -1004,22 +1060,14 @@
         }
 
         .result-card-emoji {
-            font-size: 2.2rem;
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--forest-mid), var(--forest-deep));
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
+            display: none;
         }
 
         .result-card-title {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 1.2rem;
             font-weight: 700;
-            color: var(--cream);
+            color: var(--grey-dark);
             margin-bottom: 6px;
             line-height: 1.3;
         }
@@ -1029,7 +1077,7 @@
             gap: 16px;
             flex-wrap: wrap;
             font-size: 0.8rem;
-            color: rgba(248, 245, 238, 0.5);
+            color: var(--grey-medium);
         }
 
         .result-card-meta span {
@@ -1050,9 +1098,9 @@
             font-weight: 600;
             padding: 4px 10px;
             border-radius: 100px;
-            background: rgba(139, 195, 74, 0.12);
-            border: 1px solid rgba(139, 195, 74, 0.25);
-            color: var(--lime);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--lake);
         }
 
         .result-card-actions {
@@ -1060,7 +1108,7 @@
             gap: 10px;
             flex-wrap: wrap;
             padding-top: 16px;
-            border-top: 1px solid rgba(139, 195, 74, 0.1);
+            border-top: 1px solid rgba(85, 165, 195, 0.1);
         }
 
         .action-btn {
@@ -1083,36 +1131,139 @@
         }
 
         .action-btn-preview {
-            background: linear-gradient(135deg, var(--lime), var(--lime-bright));
-            color: var(--forest-deep);
+            background: var(--lake);
+            color: white;
         }
 
         .action-btn-preview:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 24px rgba(85, 165, 195, 0.4);
+            background: var(--lake-dark);
+        }
+
+        .action-btn-preview:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .action-btn-download {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(248, 245, 238, 0.2);
-            color: var(--cream);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--lake);
         }
 
         .action-btn-download:hover {
-            border-color: var(--lime);
-            color: var(--lime);
-            background: rgba(139, 195, 74, 0.08);
+            transform: translateY(-3px) scale(1.05);
+            border-color: var(--lake);
+            color: white;
+            background: var(--lake);
+            box-shadow: 0 8px 24px rgba(85, 165, 195, 0.3);
+        }
+
+        .action-btn-download:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .action-btn-delete {
-            background: rgba(220, 60, 60, 0.1);
-            border: 1px solid rgba(220, 60, 60, 0.25);
-            color: #e57373;
+            background: rgba(220, 50, 50, 0.1);
+            border: 1px solid rgba(220, 50, 50, 0.25);
+            color: #dc3200;
         }
 
         .action-btn-delete:hover {
-            background: rgba(220, 60, 60, 0.2);
-            border-color: rgba(220, 60, 60, 0.5);
+            transform: translateY(-3px) scale(1.05);
+            background: rgba(220, 50, 50, 0.3);
+            border-color: #dc3200;
+            box-shadow: 0 8px 24px rgba(220, 50, 50, 0.25);
+        }
+
+        .action-btn-delete:active {
+            transform: translateY(-1px) scale(0.98);
+        }
+
+        /* ── DELETE CONFIRMATION MODAL ── */
+        .delete-confirmation-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+        }
+
+        .delete-confirmation-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease both;
+        }
+
+        .delete-confirmation-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 32px 100px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s ease both;
+        }
+
+        .delete-confirmation-modal h2 {
+            font-family: 'Cormorant', serif;
+            font-size: 1.5rem;
+            color: var(--grey-dark);
+            margin-bottom: 12px;
+        }
+
+        .delete-confirmation-modal p {
+            color: var(--grey-medium);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .delete-confirmation-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .delete-confirmation-actions button {
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-cancel {
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--grey-dark);
+        }
+
+        .btn-cancel:hover {
+            background: rgba(85, 165, 195, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(85, 165, 195, 0.2);
+        }
+
+        .btn-delete-confirm {
+            background: #dc3200;
+            color: white;
+            border: none;
+        }
+
+        .btn-delete-confirm:hover {
+            background: #b82800;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 50, 50, 0.3);
+        }
+
+        .btn-delete-confirm:active {
+            transform: translateY(0);
         }
 
         /* ── PREVIEW MODAL ── */
@@ -1211,11 +1362,11 @@
 
         /* ── SPROUT VARIETIES ── */
         .varieties-section {
-            background: var(--forest-deep);
+            background: rgba(242, 248, 252, 0.8);
         }
 
         .varieties-section .section-title {
-            color: var(--cream);
+            color: var(--grey-dark);
         }
 
         .varieties-scroll {
@@ -1226,13 +1377,13 @@
             max-width: 1200px;
             margin: 0 auto;
             scrollbar-width: thin;
-            scrollbar-color: var(--lime) rgba(255, 255, 255, 0.1);
+            scrollbar-color: var(--lake) rgba(85, 165, 195, 0.1);
         }
 
         .variety-card {
             min-width: 200px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(139, 195, 74, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(85, 165, 195, 0.15);
             border-radius: 20px;
             padding: 28px 24px;
             text-align: center;
@@ -1242,34 +1393,49 @@
         }
 
         .variety-card:hover {
-            background: rgba(139, 195, 74, 0.1);
-            border-color: var(--lime);
+            background: rgba(85, 165, 195, 0.08);
+            border-color: var(--lake);
             transform: translateY(-4px);
         }
 
         .variety-emoji {
             font-size: 2.5rem;
             margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            margin-left: auto;
+            margin-right: auto;
+            color: var(--lake);
+        }
+        
+        .variety-emoji svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--lake);
         }
 
         .variety-name {
             font-weight: 700;
-            color: var(--cream);
+            color: var(--grey-dark);
             font-size: 1rem;
             margin-bottom: 6px;
+            font-family: 'Cormorant', serif;
         }
 
         .variety-benefit {
             font-size: 0.78rem;
-            color: rgba(248, 245, 238, 0.5);
+            color: var(--grey-medium);
             line-height: 1.5;
         }
 
         .variety-badge {
             display: inline-block;
             margin-top: 10px;
-            background: rgba(139, 195, 74, 0.2);
-            color: var(--lime);
+            background: rgba(85, 165, 195, 0.1);
+            color: var(--lake);
             font-size: 0.7rem;
             font-weight: 600;
             letter-spacing: 0.5px;
@@ -1279,7 +1445,7 @@
 
         /* ── NUTRITION FOCUS ── */
         .nutrition-section {
-            background: var(--cream);
+            background: var(--white);
         }
 
         .nutrition-cards {
@@ -1291,11 +1457,11 @@
         }
 
         .nutrition-focus-card {
-            background: white;
+            background: var(--grey-light);
             border-radius: 18px;
             padding: 24px 18px;
-            border: 1px solid rgba(26, 58, 42, 0.08);
-            box-shadow: 0 4px 20px var(--shadow);
+            border: 1px solid rgba(85, 165, 195, 0.08);
+            box-shadow: 0 2px 12px rgba(85, 165, 195, 0.08);
             text-align: center;
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
@@ -1308,15 +1474,28 @@
         .nf-icon {
             font-size: 2.2rem;
             margin-bottom: 10px;
-            display: block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             animation: pulse-icon 3s ease infinite;
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 10px;
+            color: var(--lake);
+        }
+        
+        .nf-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--lake);
         }
 
         .nf-title {
             font-weight: 700;
-            color: var(--forest-deep);
+            color: var(--grey-dark);
             font-size: 0.95rem;
             margin-bottom: 6px;
+            font-family: 'Cormorant', serif;
         }
 
         .nf-desc {
@@ -1327,16 +1506,16 @@
 
         .nf-sprout {
             font-size: 0.72rem;
-            color: var(--lime);
+            color: var(--lake);
             font-weight: 600;
             margin-top: 8px;
         }
 
         /* ── FOOTER ── */
         footer {
-            background: var(--forest-deep);
+            background: var(--white);
             padding: 48px 48px 28px;
-            border-top: 1px solid rgba(139, 195, 74, 0.1);
+            border-top: 1px solid rgba(85, 165, 195, 0.1);
         }
 
         .footer-top {
@@ -1347,21 +1526,21 @@
         }
 
         .footer-logo {
-            font-family: 'Playfair Display', serif;
+            font-family: 'Cormorant', serif;
             font-size: 1.5rem;
             font-weight: 900;
-            color: var(--lime);
+            color: var(--lake);
             margin-bottom: 16px;
         }
 
         .footer-logo span {
-            color: var(--cream);
+            color: var(--grey-dark);
         }
 
         .footer-tagline {
             font-size: 0.875rem;
             line-height: 1.7;
-            color: rgba(248, 245, 238, 0.5);
+            color: var(--grey-medium);
             max-width: 280px;
         }
 
@@ -1370,7 +1549,7 @@
             font-weight: 700;
             letter-spacing: 1px;
             text-transform: uppercase;
-            color: var(--lime);
+            color: var(--lake);
             margin-bottom: 16px;
         }
 
@@ -1383,18 +1562,18 @@
         }
 
         .footer-col ul li a {
-            color: rgba(248, 245, 238, 0.5);
+            color: var(--grey-medium);
             text-decoration: none;
             font-size: 0.875rem;
             transition: color 0.3s;
         }
 
         .footer-col ul li a:hover {
-            color: var(--lime);
+            color: var(--lake);
         }
 
         .footer-bottom {
-            border-top: 1px solid rgba(248, 245, 238, 0.08);
+            border-top: 1px solid rgba(85, 165, 195, 0.08);
             padding-top: 24px;
             display: flex;
             justify-content: space-between;
@@ -1405,7 +1584,7 @@
 
         .footer-copy {
             font-size: 0.8rem;
-            color: rgba(248, 245, 238, 0.35);
+            color: var(--grey-medium);
         }
 
         /* ── PAGE SYSTEM ── */
@@ -1413,6 +1592,7 @@
             display: none;
             opacity: 0;
             transition: opacity 0.5s ease;
+            width: 100%;
         }
 
         .page-view.active {
@@ -1429,9 +1609,9 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(139, 195, 74, 0.25);
-            color: var(--lime);
+            background: rgba(85, 165, 195, 0.08);
+            border: 1px solid rgba(85, 165, 195, 0.2);
+            color: var(--lake);
             padding: 10px 22px;
             border-radius: 100px;
             font-size: 0.875rem;
@@ -1443,8 +1623,8 @@
         }
 
         .back-btn:hover {
-            background: rgba(139, 195, 74, 0.12);
-            border-color: var(--lime);
+            background: rgba(85, 165, 195, 0.12);
+            border-color: var(--lake);
             transform: translateX(-4px);
         }
 
@@ -1460,7 +1640,8 @@
 
         /* Generator page top padding for standalone view */
         .generator-page-wrapper {
-            padding-top: 90px;
+            padding-top: 120px;
+        }
         }
 
         /* ── ANIMATIONS ── */
@@ -1661,6 +1842,7 @@
 
             .hero h1 {
                 font-size: clamp(2rem, 5vw, 3rem);
+                font-family: 'Cormorant', serif;
             }
 
             .hero-sub {
@@ -1688,6 +1870,7 @@
 
             .section-title {
                 font-size: clamp(1.5rem, 4vw, 2rem);
+                font-family: 'Cormorant', serif;
             }
 
             .features-grid {
@@ -1749,7 +1932,7 @@
 
             .recipe-sidebar {
                 border-right: none;
-                border-bottom: 1px solid rgba(26, 58, 42, 0.08);
+                border-bottom: 1px solid rgba(85, 165, 195, 0.08);
             }
 
             .recipe-header {
@@ -1788,7 +1971,7 @@
             }
 
             .generator-page-wrapper {
-                padding-top: 76px;
+                padding-top: 95px;
             }
 
             .variety-card {
@@ -1818,6 +2001,7 @@
 
             .hero h1 {
                 font-size: 1.8rem;
+                font-family: 'Cormorant', serif;
             }
 
             .hero-badge {
@@ -1870,6 +2054,7 @@
 
             .section-title {
                 font-size: 1.4rem;
+                font-family: 'Cormorant', serif;
             }
 
             .section-eyebrow {
@@ -1936,7 +2121,7 @@
             }
 
             .generator-page-wrapper {
-                padding-top: 70px;
+                padding-top: 88px;
             }
 
             .back-btn {
@@ -1957,6 +2142,7 @@
 
             .recipe-title-output {
                 font-size: 1.5rem;
+                font-family: 'Cormorant', serif;
             }
 
             .variety-card {
@@ -1988,31 +2174,440 @@
             }
         }
 
-        /* ── RESPONSIVE: Extra Small (360px) ── */
-        @media (max-width: 360px) {
-            .hero h1 {
-                font-size: 1.5rem;
+        /* ── RESPONSIVE: Small Phones (320px-374px) ── */
+        @media (max-width: 374px) {
+            nav {
+                padding: 10px 12px;
             }
 
-            .hero-sub {
-                font-size: 0.82rem;
+            .nav-logo {
+                font-size: 1.1rem;
             }
 
-            .section {
-                padding: 28px 12px;
+            .nav-cta {
+                padding: 7px 12px;
+                font-size: 0.75rem;
             }
 
-            .nutrition-cards {
+            .generator-page-wrapper {
+                padding: 80px 12px 32px;
+            }
+
+            .generator-inner {
+                padding: 0;
+            }
+
+            .section-title {
+                font-size: 1.4rem;
+                font-family: 'Cormorant', serif;
+            }
+
+            [style*="padding:40px"] {
+                padding: 18px 12px !important;
+                border-radius: 12px;
+            }
+
+            input, select, textarea {
+                font-size: 16px;
+                padding: 12px 12px;
+            }
+
+            .result-card {
+                padding: 14px 12px;
+            }
+
+            .action-btn {
+                font-size: 0.8rem;
+                padding: 10px 10px;
+            }
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(85, 165, 195, 0.3);
+            border-top-color: var(--lake);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* ── ENHANCED RESPONSIVE: Mobile Optimization ── */
+        @media (max-width: 768px) {
+            /* Touch-friendly buttons */
+            button, .btn-primary, .btn-secondary, .action-btn {
+                min-height: 44px;
+                min-width: 44px;
+                padding: 12px 20px;
+            }
+
+            /* Better form input sizes for mobile */
+            input, select, textarea {
+                font-size: 16px;
+                min-height: 44px;
+                padding: 12px 16px;
+                width: 100%;
+            }
+
+            /* Generator page mobile */
+            .generator-page-wrapper {
+                padding: 90px 16px 40px;
+            }
+
+            .generator-inner {
+                padding: 0;
+            }
+
+            .section-header {
+                padding: 0;
+                margin: 0 0 24px 0;
+            }
+
+            .generator-section {
+                padding: 50px 0 40px;
+            }
+
+            [style*="background:rgba(255,255,255,0.04)"][style*="padding:40px"] {
+                padding: 20px 16px !important;
+                border-radius: 16px;
+            }
+
+            .form-grid {
                 grid-template-columns: 1fr;
-                gap: 10px;
+                gap: 12px;
             }
 
-            .stats-strip {
-                gap: 10px;
+            .form-group {
+                margin: 0;
             }
 
-            .stat {
-                flex: 1 1 45%;
+            /* Result card responsive */
+            .result-card {
+                padding: 18px 16px;
+                margin-bottom: 12px;
+            }
+
+            .result-card-actions {
+                width: 100%;
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .action-btn {
+                flex: 1;
+                font-size: 0.85rem;
+                padding: 10px 12px;
+                min-height: 40px;
+            }
+
+            /* Responsive preview modal */
+            .preview-modal {
+                width: 95vw;
+                max-height: 85vh;
+                border-radius: 16px;
+            }
+
+            #preview-content {
+                overflow-y: auto;
+            }
+
+            /* Tags responsive */
+            .tags-group {
+                gap: 8px;
+            }
+
+            .tag-btn {
+                padding: 10px 14px;
+                font-size: 0.9rem;
+                min-height: 40px;
+            }
+
+            /* Results section responsive */
+            #results-section {
+                margin-top: 24px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .back-btn {
+                padding: 10px 16px;
+                font-size: 0.85rem;
+                min-height: 40px;
+            }
+
+            .generate-btn {
+                width: 100%;
+                padding: 14px 20px;
+                min-height: 44px;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ── ENHANCED RESPONSIVE: Tablet (481px-768px) ── */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .generator-page-wrapper {
+                padding: 95px 24px 40px;
+            }
+
+            .generator-inner {
+                padding: 0;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            input, select, textarea {
+                font-size: 15px;
+                padding: 12px 14px;
+            }
+
+            button {
+                padding: 11px 18px;
+                font-size: 0.95rem;
+            }
+
+            .back-btn {
+                margin: 14px 0 18px 0;
+            }
+
+            [style*="padding:40px"] {
+                padding: 24px 20px !important;
+            }
+        }
+
+        /* ── RESPONSIVE: Wide Mobile (375px-480px) ── */
+        @media (min-width: 375px) and (max-width: 480px) {
+            nav {
+                padding: 12px 14px;
+            }
+
+            .nav-logo {
+                font-size: 1.3rem;
+            }
+
+            .nav-cta {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+                min-height: 40px;
+            }
+
+            .hero {
+                padding: 70px 16px 32px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+                line-height: 1.3;
+                font-family: 'Cormorant', serif;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+                padding: 12px 20px;
+            }
+
+            .form-grid {
+                gap: 12px;
+                grid-template-columns: 1fr;
+            }
+
+            input, select, textarea {
+                padding: 12px 14px;
+                font-size: 15px;
+                width: 100%;
+            }
+
+            .result-card {
+                padding: 16px 14px;
+            }
+
+            .generator-page-wrapper {
+                padding: 88px 14px 40px;
+            }
+
+            .generator-inner {
+                padding: 0;
+            }
+
+            .generator-section {
+                padding: 60px 0 40px;
+            }
+
+            .section-header {
+                padding: 0 14px;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+                font-family: 'Cormorant', serif;
+            }
+
+            .form-grid {
+                padding: 0 14px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                width: 100%;
+                min-height: 44px;
+                padding: 12px 14px;
+                font-size: 16px;
+            }
+
+            .generate-btn {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 0.95rem;
+                min-height: 44px;
+            }
+
+            [style*="padding:40px"] {
+                padding: 24px 16px !important;
+            }
+
+            .back-btn {
+                margin: 12px 14px 16px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+        }
+
+        /* ── RESPONSIVE: Desktop+ ── */
+        @media (min-width: 1025px) {
+            .nav-links {
+                display: flex !important;
+            }
+
+            .result-card-actions {
+                display: flex;
+                flex-direction: row;
+            }
+
+            button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(85, 165, 195, 0.2);
+            }
+
+            input:hover, select:hover, textarea:hover {
+                border-color: rgba(85, 165, 195, 0.3);
+            }
+        }
+
+        /* ── Responsive Images ── */
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        @media (max-width: 600px) {
+            img {
+                border-radius: 12px;
+                margin: 12px 0;
+            }
+        }
+
+        /* ── Responsive Text Scaling ── */
+        h1 { font-size: clamp(1.5rem, 5vw, 3rem); }
+        h2 { font-size: clamp(1.3rem, 4vw, 2rem); }
+        h3 { font-size: clamp(1rem, 3vw, 1.5rem); }
+        p { font-size: clamp(0.875rem, 2vw, 1rem); }
+
+        /* ── Responsive Containers ── */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 12px;
+            }
+        }
+
+        /* ── Responsive Spacing ── */
+        .section-padding-lg {
+            padding: clamp(2rem, 5vw, 5rem) clamp(1rem, 4vw, 2rem);
+        }
+
+        .section-padding-md {
+            padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 4vw, 2rem);
+        }
+
+        @media (max-width: 480px) {
+            .hide-mobile {
+                display: none !important;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .show-mobile {
+                display: none !important;
+            }
+        }
+
+        /* ── Responsive Scroll Behavior ── */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ── Touch-friendly adjustments ── */
+        @media (hover: none) and (pointer: coarse) {
+            /* Mobile devices */
+            button, a, input[type="button"], input[type="submit"] {
+                min-height: 48px;
+                padding: 14px 20px;
+            }
+
+            .tag-btn {
+                padding: 12px 16px;
+                font-size: 0.95rem;
+            }
+
+            .action-btn {
+                min-height: 44px;
+                padding: 12px 16px;
+            }
+
+            input, select, textarea {
+                font-size: 16px;
+                padding: 12px 14px;
+                min-height: 44px;
+            }
+        }
+
+        /* ── Force mobile padding on generator form ── */
+        @media (max-width: 768px) {
+            div[style*="padding:40px"] {
+                padding: 20px 16px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            div[style*="padding:40px"] {
+                padding: 18px 14px !important;
+            }
+        }
+
+        @media (max-width: 374px) {
+            div[style*="padding:40px"] {
+                padding: 16px 12px !important;
             }
         }
     </style>
@@ -2022,7 +2617,9 @@
 
     <!-- NAV -->
     <nav>
-        <div class="nav-logo" style="cursor:pointer;" onclick="navigateTo('landing')">TSC<span>sprouts</span></div>
+        <div class="nav-logo" style="cursor:pointer;display:flex;align-items:center;gap:12px;" onclick="navigateTo('landing')">
+            <img src="https://d3k81ch9hvuctc.cloudfront.net/company/XTz3hK/images/6384ded2-617f-4311-a142-1652b4865843.png" alt="TSC Logo" style="height:48px;width:auto;">
+        </div>
         <ul class="nav-links">
             <li><a href="#" onclick="navigateTo('generator');return false;">Recipe Builder</a></li>
             <li><a href="#" onclick="navigateTo('landing');return false;">Sprout Varieties</a></li>
@@ -2091,42 +2688,73 @@
             </div>
             <div class="features-grid">
                 <div class="feature-card reveal">
-                    <div class="feature-icon">🎯</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M32 12L28 20H20V40C20 45.5228 24.4772 50 30 50H34C39.5228 50 44 45.5228 44 40V20H36L32 12Z"/>
+                            <path d="M32 8V6M26 10L25 8M38 10L39 8M32 28V40"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Ingredient-First Design</div>
                     <p class="feature-desc">Tell us what's in your fridge. Our AI builds around your existing
                         ingredients so
                         nothing goes to waste and every meal is immediately achievable.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">🧬</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="32" cy="32" r="20"/>
+                            <path d="M32 18V32M40 32H42M24 32H22M38 26L39 25M26 38L25 39M38 38L39 39M26 26L25 25"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Nutritional Optimization</div>
                     <p class="feature-desc">Set targets for sulforaphane, fiber, protein, or polyphenols. Every recipe
                         is
                         engineered to maximize your chosen nutritional outcome.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">🌿</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M28 48C28 48 20 40 20 32C20 24 24 18 28 18C32 18 36 22 32 28C28 22 32 18 36 18C40 18 44 24 44 32C44 40 36 48 36 48"/>
+                            <circle cx="32" cy="32" r="2" fill="currentColor"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Sprout-First Philosophy</div>
                     <p class="feature-desc">Unlike generic recipe generators, every output prioritizes TSC sprout
                         varieties —
                         making nutrition practical, not an afterthought.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">⚡</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 20L32 32L44 20M20 32L32 44L44 32M16 16H48V48H16Z"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Equipment-Aware</div>
                     <p class="feature-desc">Air fryer, blender, stovetop only? The system adapts to your kitchen setup
                         and
                         preferred cooking style automatically.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">🍽️</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M26 16C26 14 28 12 32 12C36 12 38 14 38 16C38 20 36 24 32 26C28 24 26 20 26 16Z"/>
+                            <path d="M20 32C20 30 22 28 26 28C30 28 32 30 32 32C32 36 30 40 26 42C22 40 20 36 20 32Z"/>
+                            <path d="M38 32C38 30 40 28 44 28C48 28 50 30 50 32C50 36 48 40 44 42C40 40 38 36 38 32Z"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Cuisine Intelligence</div>
                     <p class="feature-desc">From Mediterranean to Asian fusion, our AI incorporates sprouts naturally
                         into any
                         cuisine type without forcing them in awkwardly.</p>
                 </div>
                 <div class="feature-card reveal">
-                    <div class="feature-icon">📊</div>
+                    <div class="feature-icon">
+                        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="24" y="20" width="16" height="24" rx="2"/>
+                            <path d="M28 24H36M28 30H36M28 36H36M28 40H36"/>
+                            <circle cx="32" cy="12" r="3" fill="currentColor"/>
+                        </svg>
+                    </div>
                     <div class="feature-title">Full Nutrition Breakdown</div>
                     <p class="feature-desc">Every recipe comes with macros, highlighted super-nutrients, and TSC seed
                         recommendations to level up your next batch.</p>
@@ -2155,11 +2783,11 @@
                 </button>
 
                 <div class="section-header reveal">
-                    <span class="section-eyebrow" style="color:var(--lime-bright)">Recipe Intelligence Engine</span>
+                    <span class="section-eyebrow" style="color:var(--lake)">Recipe Intelligence Engine</span>
                     <h2 class="section-title">Generate Your Perfect<br>Sprout Recipe</h2>
                 </div>
 
-                <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(139,195,74,0.15);border-radius:24px;padding:40px;"
+                <div style="background:rgba(255,255,255,0.8);border:1px solid rgba(85,165,195,0.15);border-radius:24px;padding:40px;"
                     class="reveal">
 
                     <div class="form-grid">
@@ -2232,14 +2860,14 @@
                         <div class="form-group full">
                             <label>🎯 Nutritional Focus</label>
                             <div class="tags-group" id="nutrition-tags">
-                                <button class="tag-btn active" onclick="toggleTag(this)">⚗️ High Sulforaphane</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">💪 High Protein</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">🌾 High Fiber</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">🍇 Rich in Polyphenols</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">⚡ Metabolic Health</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">🧠 Anti-inflammatory</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">🩺 Blood Sugar Balance</button>
-                                <button class="tag-btn" onclick="toggleTag(this)">🫀 Heart Health</button>
+                                <button class="tag-btn active" onclick="toggleTag(this)">High Sulforaphane</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">High Protein</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">High Fiber</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">Rich in Polyphenols</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">Metabolic Health</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">Anti-inflammatory</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">Blood Sugar Balance</button>
+                                <button class="tag-btn" onclick="toggleTag(this)">Heart Health</button>
                             </div>
                         </div>
 
@@ -2289,12 +2917,17 @@
     <!-- SPROUT VARIETIES -->
     <section class="section varieties-section" id="varieties">
         <div class="section-header reveal">
-            <span class="section-eyebrow" style="color:var(--lime-bright)">TSC Seed Collection</span>
+            <span class="section-eyebrow" style="color:var(--lake)">TSC Seed Collection</span>
             <h2 class="section-title">Choose Your Sprout Variety</h2>
         </div>
         <div class="varieties-scroll">
             <div class="variety-card reveal">
-                <div class="variety-emoji">🥦</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 12L28 20H20V40C20 45.5228 24.4772 50 30 50H34C39.5228 50 44 45.5228 44 40V20H36L32 12Z"/>
+                        <path d="M32 8V6M26 10L25 8M38 10L39 8"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Broccoli Sprouts</div>
                 <div class="variety-benefit">100× more glucoraphanin than mature broccoli. Nature's sulforaphane
                     powerhouse.
@@ -2302,45 +2935,82 @@
                 <span class="variety-badge">⚗️ Sulforaphane King</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🌾</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 12C32 12 28 18 28 25C28 32 30 38 32 42C34 38 36 32 36 25C36 18 32 12 32 12Z"/>
+                        <path d="M20 50H44M22 46H42"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Alfalfa Sprouts</div>
                 <div class="variety-benefit">Packed with Vitamins K, C, and folate. Mild flavor, works in anything.
                 </div>
                 <span class="variety-badge">🌿 Vitamin Rich</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🫘</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="32" cy="32" r="16"/>
+                        <path d="M32 20V44M20 32H44M24 24L40 40M40 24L24 40"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Lentil Sprouts</div>
                 <div class="variety-benefit">Complete plant protein profile. Ideal for muscle recovery meals.</div>
                 <span class="variety-badge">💪 Protein Dense</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🌶️</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 12C32 12 28 18 28 24C28 32 32 40 32 50C32 40 36 32 36 24C36 18 32 12 32 12Z"/>
+                        <path d="M28 28L36 28M28 35L36 35"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Radish Sprouts</div>
                 <div class="variety-benefit">Spicy & detoxifying. High in folate with strong liver-support compounds.
                 </div>
                 <span class="variety-badge">🔥 Detox Support</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🫛</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 14C32 14 28 20 28 28C28 36 30 42 32 48C34 42 36 36 36 28C36 20 32 14 32 14Z"/>
+                        <circle cx="24" cy="36" r="3" fill="currentColor"/>
+                        <circle cx="40" cy="36" r="3" fill="currentColor"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Mung Bean Sprouts</div>
                 <div class="variety-benefit">Exceptionally high fiber and digestive enzyme content. Gut-friendly.</div>
                 <span class="variety-badge">🌾 Fiber Champion</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🌻</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="32" cy="20" r="6"/>
+                        <path d="M32 26V44C32 48 28 50 24 50H40C36 50 32 48 32 44V26Z"/>
+                        <path d="M24 32H40M24 40H40"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Sunflower Sprouts</div>
                 <div class="variety-benefit">Rich in Vitamin E, B-complex, and zinc. Buttery, nutty flavor.</div>
                 <span class="variety-badge">☀️ Skin & Energy</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🍀</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M28 20C28 20 24 24 24 30C24 38 28 44 32 50C36 44 40 38 40 30C40 24 36 20 36 20"/>
+                        <path d="M28 28H36M28 36H36"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Clover Sprouts</div>
                 <div class="variety-benefit">High in isoflavones and phytoestrogens. Hormonal balance support.</div>
                 <span class="variety-badge">⚖️ Hormone Balance</span>
             </div>
             <div class="variety-card reveal">
-                <div class="variety-emoji">🌿</div>
+                <div class="variety-emoji">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 12L28 20H20V40C20 45.5228 24.4772 50 30 50H34C39.5228 50 44 45.5228 44 40V20H36L32 12Z"/>
+                        <path d="M28 30H36M28 38H36"/>
+                    </svg>
+                </div>
                 <div class="variety-name">Fenugreek Sprouts</div>
                 <div class="variety-benefit">Helps regulate blood sugar. Slightly bitter, potent metabolic impact.</div>
                 <span class="variety-badge">🩺 Blood Sugar</span>
@@ -2356,7 +3026,12 @@
         </div>
         <div class="nutrition-cards">
             <div class="nutrition-focus-card reveal">
-                <span class="nf-icon">⚗️</span>
+                <span class="nf-icon">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="32" cy="32" r="20"/>
+                        <path d="M32 18V46M18 32H46M25 25L39 39M39 25L25 39"/>
+                    </svg>
+                </span>
                 <div class="nf-title">Sulforaphane Boost</div>
                 <div class="nf-desc">Recipes optimized to activate Nrf2 pathways. Anti-cancer, anti-aging, and
                     detoxifying
@@ -2364,7 +3039,12 @@
                 <div class="nf-sprout">Best with: Broccoli Sprouts</div>
             </div>
             <div class="nutrition-focus-card reveal">
-                <span class="nf-icon">💪</span>
+                <span class="nf-icon">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M24 20C24 20 20 28 20 36C20 45.9 25 50 32 50C39 50 44 45.9 44 36C44 28 40 20 40 20"/>
+                        <path d="M28 24V32M32 24V36M36 24V32M28 42H36"/>
+                    </svg>
+                </span>
                 <div class="nf-title">High Protein</div>
                 <div class="nf-desc">Complete amino acid profiles using sprouted legumes. Ideal for active lifestyles
                     and muscle
@@ -2372,14 +3052,27 @@
                 <div class="nf-sprout">Best with: Lentil, Mung Bean</div>
             </div>
             <div class="nutrition-focus-card reveal">
-                <span class="nf-icon">🌾</span>
+                <span class="nf-icon">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 12C32 12 28 18 28 25C28 32 30 38 32 42C34 38 36 32 36 25C36 18 32 12 32 12Z"/>
+                        <circle cx="28" cy="28" r="2" fill="currentColor"/>
+                        <circle cx="36" cy="28" r="2" fill="currentColor"/>
+                        <path d="M20 50H44M22 46H42"/>
+                    </svg>
+                </span>
                 <div class="nf-title">Fiber Rich</div>
                 <div class="nf-desc">Feed your microbiome with prebiotic-dense sprouted grains and seeds for gut health
                     optimization.</div>
                 <div class="nf-sprout">Best with: Fenugreek, Alfalfa</div>
             </div>
             <div class="nutrition-focus-card reveal">
-                <span class="nf-icon">🍇</span>
+                <span class="nf-icon">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="32" cy="32" r="18"/>
+                        <path d="M32 16V48M16 32H48"/>
+                        <path d="M23 23L41 41M41 23L23 41"/>
+                    </svg>
+                </span>
                 <div class="nf-title">Polyphenol Dense</div>
                 <div class="nf-desc">Maximize antioxidant load to combat oxidative stress. Supports cognitive function
                     and
@@ -2387,7 +3080,11 @@
                 <div class="nf-sprout">Best with: Radish, Clover</div>
             </div>
             <div class="nutrition-focus-card reveal">
-                <span class="nf-icon">⚡</span>
+                <span class="nf-icon">
+                    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M32 14L38 30H55L42 40L48 56L32 47L16 56L22 40L9 30H26L32 14Z"/>
+                    </svg>
+                </span>
                 <div class="nf-title">Metabolic Health</div>
                 <div class="nf-desc">Blood sugar balancing, insulin sensitizing recipes that support sustained energy
                     without
@@ -2401,7 +3098,7 @@
     <footer>
         <div class="footer-top">
             <div class="footer-brand">
-                <div class="footer-logo">TSC<span>sprouts</span></div>
+                <img src="https://d3k81ch9hvuctc.cloudfront.net/company/XTz3hK/images/6384ded2-617f-4311-a142-1652b4865843.png" alt="TSC Logo" style="height:48px;width:auto;margin-bottom:16px;">
                 <p class="footer-tagline">Sprouting intelligence for everyday nutrition. Powered by AI, rooted in
                     nature, backed
                     by science.</p>
@@ -2449,7 +3146,23 @@
         </div>
     </div>
 
+    <!-- Delete Confirmation Modal -->
+    <div class="delete-confirmation-overlay" id="delete-confirmation-modal">
+        <div class="delete-confirmation-modal">
+            <h2>Delete Recipe?</h2>
+            <p>Are you sure you want to delete this recipe? This action cannot be undone.</p>
+            <div class="delete-confirmation-actions">
+                <button class="btn-cancel" onclick="cancelDelete()">Cancel</button>
+                <button class="btn-delete-confirm" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // ── CONFIGURATION ──
+        const API_BASE_URL = 'http://localhost:5000/api';
+        const WEBHOOK_URL = 'https://thesproutingcompany.app.n8n.cloud/webhook/recipeapp';
+
         // ── PAGE NAVIGATION
         function navigateTo(pageId) {
             const currentPage = document.querySelector('.page-view.active');
@@ -2514,14 +3227,13 @@
         let timerInterval = null;
         let timerSeconds = 0;
         let dotInterval = null;
-        let currentRequestController = null; // Track abort controller to handle overlapping requests
+        let currentRequestController = null;
 
         function startTimer() {
             const timerSection = document.getElementById('timer-section');
             const timerDisplay = document.getElementById('timer-display');
             const timerDots = document.getElementById('timer-dots');
 
-            // Smooth scroll down to timer
             timerSection.classList.add('active');
             setTimeout(() => {
                 timerSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2558,23 +3270,19 @@
                 currentRequestController.abort();
             }
             stopTimer();
-            document.getElementById('gen-btn').disabled = false;
         }
 
         // ── RESULTS & PREVIEW LOGIC
         let generatedRecipes = [];
-        let currentPreviewHtml = '';
 
-        function saveHistory() {
-            localStorage.setItem('tsc_recipe_history', JSON.stringify(generatedRecipes));
-        }
-
-        function loadHistory() {
+        async function loadHistoryFromDB() {
             try {
-                const saved = localStorage.getItem('tsc_recipe_history');
-                if (saved) {
-                    generatedRecipes = JSON.parse(saved);
-                    if (Array.isArray(generatedRecipes) && generatedRecipes.length > 0) {
+                const response = await fetch(`${API_BASE_URL}/recipes`);
+                if (!response.ok) throw new Error('Failed to load recipes');
+                const data = await response.json();
+                if (data.success && Array.isArray(data.data)) {
+                    generatedRecipes = data.data;
+                    if (generatedRecipes.length > 0) {
                         document.getElementById('results-section').classList.add('active');
                         document.getElementById('results-count').textContent =
                             `${generatedRecipes.length} recipe${generatedRecipes.length > 1 ? 's' : ''}`;
@@ -2582,33 +3290,37 @@
                         const list = document.getElementById('results-container');
                         list.innerHTML = '';
                         generatedRecipes.forEach(recipe => {
-                            // Re-use addResultCard without unshifting to the array
                             const card = createCardElement(recipe);
                             list.appendChild(card);
                         });
-                    } else {
-                        generatedRecipes = [];
                     }
                 }
-            } catch (e) { console.error('Loading history failed:', e); }
+            } catch (error) {
+                console.error('Failed to load recipes from DB:', error);
+            }
+        }
+
+        function formatRecipeDate(dateValue) {
+            if (!dateValue) return '';
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) return '';
+            
+            const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
+            return date.toLocaleDateString('en-US', options);
         }
 
         function createCardElement(recipe) {
             let cardTitle = recipe.title || 'Sprout Recipe';
-            // Try to extract title from HTML if empty
-            if (cardTitle === 'Sprout Recipe' && (recipe.html || recipe.prebuilt_html)) {
-                const match = (recipe.html || recipe.prebuilt_html).match(/<h2[^>]*>(.*?)<\/h2>/i);
-                if (match) cardTitle = match[1].replace(/<[^>]+>/g, '').trim() || cardTitle;
-            }
-
             let cardDesc = recipe.description || '';
             let cardImg = recipe.image_url || '';
             let cardPrep = recipe.prep_time || recipe.prepTime || '';
             let cardServ = recipe.servings || '';
+            let cardDate = recipe.createdAt || recipe.created_at || '';
+            const recipeId = recipe._id;
 
             const card = document.createElement('div');
             card.className = 'result-card';
-            card.id = `result-card-${recipe._id}`;
+            card.id = `result-card-${recipeId}`;
 
             card.innerHTML = `
       <div class="result-card-top">
@@ -2618,6 +3330,7 @@
         <div class="result-card-info">
           <div class="result-card-title">${cardTitle}</div>
           <div class="result-card-meta">
+            ${cardDate ? '<span>' + formatRecipeDate(cardDate) + '</span>' : ''}
             ${cardPrep ? '<span>⏱️ ' + cardPrep + '</span>' : ''}
             ${cardServ ? '<span>🍽 ' + cardServ + ' servings</span>' : ''}
           </div>
@@ -2625,15 +3338,15 @@
         </div>
       </div>
       <div class="result-card-actions">
-        <button class="action-btn action-btn-preview" onclick="previewRecipe(${recipe._id})">
+        <button class="action-btn action-btn-preview" onclick="previewRecipe('${recipeId}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           Preview
         </button>
-        <button class="action-btn action-btn-download" onclick="downloadPdf(${recipe._id})">
+        <button class="action-btn action-btn-download" onclick="downloadPdf('${recipeId}', this)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Save PDF
         </button>
-        <button class="action-btn action-btn-delete" onclick="deleteRecipe(this, ${recipe._id})">
+        <button class="action-btn action-btn-delete" onclick="deleteRecipe('${recipeId}')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           Delete
         </button>
@@ -2642,85 +3355,64 @@
             return card;
         }
 
-        function addResultCard(recipe) {
+        async function addResultCard(recipe) {
+            // Add timestamp if not already present
+            if (!recipe.createdAt && !recipe.created_at) {
+                recipe.createdAt = new Date().toISOString();
+            }
+
+            // Save to backend first
+            try {
+                const saveResponse = await fetch(`${API_BASE_URL}/recipes/save`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(recipe)
+                });
+                if (!saveResponse.ok) throw new Error('Failed to save recipe');
+                const savedData = await saveResponse.json();
+                recipe._id = savedData._id;
+                // Update timestamp from server response if available
+                if (savedData.createdAt) {
+                    recipe.createdAt = savedData.createdAt;
+                }
+            } catch (error) {
+                console.error('Failed to save recipe to database:', error);
+                recipe._id = Date.now().toString();
+            }
+
             const resultsSection = document.getElementById('results-section');
             resultsSection.classList.add('active');
 
-            const uniqueId = Date.now();
-            recipe._id = uniqueId;
             generatedRecipes.unshift(recipe);
 
             document.getElementById('results-count').textContent =
                 `${generatedRecipes.length} recipe${generatedRecipes.length > 1 ? 's' : ''}`;
 
-            // ── Extract a readable title for the history card
-            let cardTitle = recipe.title || 'Sprout Recipe';
-            let cardDesc = recipe.description || '';
-            let cardImg = recipe.image_url || '';
-            let cardPrep = recipe.prep_time || recipe.prepTime || '';
-            let cardServ = recipe.servings || '';
-
             const list = document.getElementById('results-container');
-            const card = document.createElement('div');
-            card.className = 'result-card';
-            card.id = `result-card-${uniqueId}`;
-
-            card.innerHTML = `
-      <div class="result-card-top">
-        ${cardImg
-                    ? `<img src="${cardImg}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:12px;flex-shrink:0;" />`
-                    : `<div class="result-card-emoji">🥗</div>`}
-        <div class="result-card-info">
-          <div class="result-card-title">${cardTitle}</div>
-          <div class="result-card-meta">
-            ${cardPrep ? `<span>⏱️ ${cardPrep}</span>` : ''}
-            ${cardServ ? `<span>🍽 ${cardServ} servings</span>` : ''}
-          </div>
-          <div style="font-size:0.8rem;color:rgba(248,245,238,0.5);margin-top:6px;line-height:1.5;">${cardDesc.substring(0, 120)}${cardDesc.length > 120 ? '…' : ''}</div>
-        </div>
-      </div>
-      <div class="result-card-actions">
-        <button class="action-btn action-btn-preview" onclick="previewRecipe(${uniqueId})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Preview
-        </button>
-        <button class="action-btn action-btn-download" onclick="downloadPdf(${uniqueId})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Save PDF
-        </button>
-        <button class="action-btn action-btn-delete" onclick="deleteRecipe(this, ${uniqueId})">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Delete
-        </button>
-      </div>
-    `;
+            const card = createCardElement(recipe);
             list.prepend(card);
 
             setTimeout(() => { card.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
         }
 
         function previewRecipe(id) {
-            const recipe = generatedRecipes.find(r => r._id === id);
+            const recipe = generatedRecipes.find(r => r._id == id);
             if (!recipe) return;
 
             const modal = document.getElementById('preview-modal');
             const previewContent = document.getElementById('preview-content');
 
-            // ── PRIMARY PATH: recipe has a pre-built HTML string → inject into iframe
             const rawHtml = recipe.html || recipe.htmlContent || recipe.prebuilt_html || '';
 
             if (rawHtml) {
-                // Use an iframe so the recipe's own CSS runs cleanly, no conflicts
                 previewContent.innerHTML = `<iframe id="recipe-iframe" srcdoc="" style="width:100%;min-height:90vh;border:none;display:block;"></iframe>`;
                 const iframe = document.getElementById('recipe-iframe');
-                // srcdoc attribute has length limits in some browsers — use contentWindow.document instead
                 iframe.onload = null;
                 const iDoc = iframe.contentWindow.document;
                 iDoc.open();
                 iDoc.write(rawHtml);
                 iDoc.close();
             } else {
-                // Fallback: build from JSON fields
                 const n = recipe.nutrition || {};
                 const ingList = (recipe.ingredients || []).map(i => {
                     if (typeof i === 'object') return `<li><strong>${i.item || ''}</strong> — ${i.quantity || ''}</li>`;
@@ -2747,37 +3439,69 @@
             document.body.style.overflow = '';
         }
 
-        function deleteRecipe(btn, id) {
-            if (confirm('Are you sure you want to delete this recipe?')) {
-                generatedRecipes = generatedRecipes.filter(r => r._id !== id);
-                saveHistory(); // Update localStorage
-                btn.closest('.result-card').remove();
+        let pendingDeleteId = null;
+
+        async function deleteRecipe(id) {
+            pendingDeleteId = id;
+            document.getElementById('delete-confirmation-modal').classList.add('active');
+        }
+
+        function cancelDelete() {
+            document.getElementById('delete-confirmation-modal').classList.remove('active');
+            pendingDeleteId = null;
+        }
+
+        async function confirmDelete() {
+            const id = pendingDeleteId;
+            if (!id) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/recipes/${id}`, {
+                    method: 'DELETE'
+                });
+                if (!response.ok) throw new Error('Failed to delete recipe');
+                
+                generatedRecipes = generatedRecipes.filter(r => r._id != id);
+                const cardElement = document.getElementById(`result-card-${id}`);
+                if (cardElement) cardElement.remove();
+                
                 const remain = generatedRecipes.length;
                 document.getElementById('results-count').textContent = `${remain} recipe${remain !== 1 ? 's' : ''}`;
                 if (remain === 0) {
                     document.getElementById('results-section').classList.remove('active');
                 }
+
+                document.getElementById('delete-confirmation-modal').classList.remove('active');
+                pendingDeleteId = null;
+            } catch (error) {
+                console.error('Failed to delete recipe:', error);
+                alert('Failed to delete recipe');
             }
         }
 
-        function downloadPdf(id) {
-            const recipe = generatedRecipes.find(r => r._id === id);
+        function downloadPdf(id, buttonElement) {
+            const recipe = generatedRecipes.find(r => r._id == id);
             if (!recipe) return;
+            
             const rawHtml = recipe.html || recipe.htmlContent || recipe.prebuilt_html || '';
-            if (rawHtml) {
-                // Open in new tab and trigger print
-                const win = window.open('', '_blank');
-                win.document.open();
-                win.document.write(rawHtml);
-                win.document.close();
-                setTimeout(() => { win.focus(); win.print(); }, 800);
-            } else {
-                previewRecipe(id);
-                setTimeout(() => { window.print(); }, 800);
+            if (!rawHtml) {
+                alert('No recipe content');
+                return;
             }
+            
+            // Create a new window with just the recipe
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(rawHtml);
+            printWindow.document.close();
+            
+            // Wait for content to load, then print
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
         }
 
-        // ── RECIPE GENERATOR WEBOOK SUMBISSION
+        // ── RECIPE GENERATOR WEBHOOK SUBMISSION
         async function generateRecipe() {
             const payload = {
                 action: "generate_recipe",
@@ -2792,25 +3516,16 @@
                 nutritionalFocus: [...document.querySelectorAll('.tag-btn.active')].map(b => b.textContent.trim())
             };
 
-            const genBtn = document.getElementById('gen-btn');
-            // We intentionally DO NOT disable the generation button completely so the user
-            // can trigger a new request anytime, which will reset the timer.
-            // Instead we can just briefly pulse it.
-            genBtn.style.transform = 'scale(0.98)';
-            setTimeout(() => genBtn.style.transform = '', 150);
-
-            // If there's an ongoing fetch request, abort it to start fresh
             if (currentRequestController) {
                 currentRequestController.abort();
             }
             currentRequestController = new AbortController();
             const signal = currentRequestController.signal;
 
-            // Start or Restart Timer
             startTimer();
 
             try {
-                const response = await fetch("https://thesproutingcompany.app.n8n.cloud/webhook/recipeapp", {
+                const response = await fetch(WEBHOOK_URL, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
@@ -2830,31 +3545,26 @@
                     }
                 }
 
-                // If we got here normally, clear timer and show results
                 stopTimer();
 
-                // Handle array or single object from n8n
                 if (Array.isArray(responseData)) {
-                    // N8n might return array of recipes
-                    responseData.forEach(r => addResultCard(r));
+                    for (let r of responseData) {
+                        await addResultCard(r);
+                    }
                 } else {
-                    // Single recipe object
-                    addResultCard(responseData);
+                    await addResultCard(responseData);
                 }
 
             } catch (err) {
-                if (err.name === 'AbortError') {
-                    console.log('Previous request aborted, new one started.');
-                } else {
+                if (err.name !== 'AbortError') {
                     console.error("Webhook Error:", err);
-                    // We keep the timer running as requested until data eventually comes or user retries
                     document.getElementById('timer-sub').textContent = "Connection issue. Standing by for response...";
                 }
             }
         }
 
-        // Load history when the page is fully loaded
-        document.addEventListener('DOMContentLoaded', loadHistory);
+        // Load recipes from database when page loads
+        document.addEventListener('DOMContentLoaded', loadHistoryFromDB);
     </script>
 </body>
 
