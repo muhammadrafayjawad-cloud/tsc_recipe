@@ -2611,6 +2611,8 @@
             }
         }
     </style>
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
 <body>
@@ -2626,6 +2628,14 @@
             <li><a href="#" onclick="navigateTo('landing');return false;">Nutrition</a></li>
             <li><a href="#" onclick="navigateTo('landing');return false;">About</a></li>
         </ul>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="user-display" style="font-size: 0.875rem; color: var(--text-muted); display: none;">
+                <span id="user-email" style="color: var(--text-dark); font-weight: 500;"></span>
+            </span>
+            <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
+            <div class="g_id_signin" data-type="standard"></div>
+            <button id="logout-btn" class="nav-cta" style="display: none; background: var(--red-clay); padding: 8px 16px; font-size: 0.875rem;" onclick="handleLogout()">Logout</button>
+        </div>
         <a href="#" class="nav-cta" onclick="navigateTo('generator');return false;">Generate Recipe →</a>
     </nav>
 
@@ -3274,10 +3284,17 @@
 
         // ── RESULTS & PREVIEW LOGIC
         let generatedRecipes = [];
+        let currentUser = null;
 
         async function loadHistoryFromDB() {
             try {
-                const response = await fetch(`${API_BASE_URL}/recipes`);
+                // Only load recipes if user is logged in
+                if (!currentUser) {
+                    document.getElementById('results-section').classList.remove('active');
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/recipes?userEmail=${encodeURIComponent(currentUser.email)}`);
                 if (!response.ok) throw new Error('Failed to load recipes');
                 const data = await response.json();
                 if (data.success && Array.isArray(data.data)) {
@@ -3293,6 +3310,8 @@
                             const card = createCardElement(recipe);
                             list.appendChild(card);
                         });
+                    } else {
+                        document.getElementById('results-section').classList.remove('active');
                     }
                 }
             } catch (error) {
@@ -3356,9 +3375,14 @@
         }
 
         async function addResultCard(recipe) {
-            // Add timestamp if not already present
+            // Add timestamp and user info if not already present
             if (!recipe.createdAt && !recipe.created_at) {
                 recipe.createdAt = new Date().toISOString();
+            }
+            
+            // Add current user email to recipe
+            if (currentUser) {
+                recipe.userEmail = currentUser.email;
             }
 
             // Save to backend first
@@ -3563,8 +3587,47 @@
             }
         }
 
+        // ── GOOGLE SIGN-IN HANDLERS ──
+        function handleCredentialResponse(response) {
+            // Parse JWT token
+            const base64Url = response.credential.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map((c) => {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+
+            const userData = JSON.parse(jsonPayload);
+            currentUser = {
+                email: userData.email,
+                name: userData.name,
+                picture: userData.picture
+            };
+
+            // Update UI
+            document.getElementById('user-display').style.display = 'flex';
+            document.getElementById('user-email').textContent = currentUser.email;
+            document.querySelector('.g_id_signin').style.display = 'none';
+            document.getElementById('logout-btn').style.display = 'block';
+
+            // Load user's recipes
+            loadHistoryFromDB();
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            document.getElementById('user-display').style.display = 'none';
+            document.getElementById('user-email').textContent = '';
+            document.querySelector('.g_id_signin').style.display = 'block';
+            document.getElementById('logout-btn').style.display = 'none';
+            document.getElementById('results-section').classList.remove('active');
+            generatedRecipes = [];
+            google.accounts.id.disableAutoSelect();
+        }
+
         // Load recipes from database when page loads
-        document.addEventListener('DOMContentLoaded', loadHistoryFromDB);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHistoryFromDB();
+        });
     </script>
 </body>
 

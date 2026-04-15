@@ -3,11 +3,18 @@ import { ObjectId } from 'mongodb';
 
 const router = express.Router();
 
-// GET all recipes
+// GET all recipes (optionally filtered by userEmail)
 router.get('/', async (req, res) => {
   try {
+    const filter = {};
+    
+    // If userEmail query parameter is provided, filter by user
+    if (req.query.userEmail) {
+      filter.userEmail = req.query.userEmail;
+    }
+    
     const recipes = await req.db.collection('recipes')
-      .find({})
+      .find(filter)
       .sort({ createdAt: -1 })
       .toArray();
     res.json({ success: true, data: recipes });
